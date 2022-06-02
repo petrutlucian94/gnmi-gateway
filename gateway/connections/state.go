@@ -314,7 +314,7 @@ func (t *ConnectionState) unlock() error {
 // cache.Target is called to generate an update. If the message is a sync_response, then targetCache is
 // marked as synchronised.
 func (t *ConnectionState) handleUpdate(msg proto.Message) error {
-	//fmt.Printf("%+v\n", msg)
+	// fmt.Printf("%+v\n", msg)
 	t.counterNotifications.Increment()
 	if !t.connected {
 		if t.queryTarget != "*" {
@@ -329,7 +329,9 @@ func (t *ConnectionState) handleUpdate(msg proto.Message) error {
 	}
 	switch v := resp.Response.(type) {
 	case *gnmipb.SubscribeResponse_Update:
+		fmt.Println("Received update")
 		if t.rejectUpdate(v.Update) {
+			fmt.Println("Rejected update")
 			t.counterRejected.Increment()
 			return nil
 		}
@@ -350,6 +352,7 @@ func (t *ConnectionState) handleUpdate(msg proto.Message) error {
 			t.seenMutex.Lock()
 			t.seen[v.Update.Prefix.Target] = true
 			t.seenMutex.Unlock()
+			fmt.Println("Updating target cache (*)")
 			err := t.updateTargetCache(targetCache, v.Update)
 			if err != nil {
 				return err
@@ -363,6 +366,7 @@ func (t *ConnectionState) handleUpdate(msg proto.Message) error {
 			if v.Update.Prefix.Target == "" {
 				v.Update.Prefix.Target = t.queryTarget
 			}
+			fmt.Println("Updating target cache (default)")
 			err := t.updateTargetCache(t.targetCache, v.Update)
 			if err != nil {
 				return err

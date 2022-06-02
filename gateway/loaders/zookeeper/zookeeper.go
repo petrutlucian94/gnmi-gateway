@@ -118,6 +118,7 @@ func (z *ZookeeperTargetLoader) GetConfiguration() (*targetpb.Configuration, err
 	}
 
 	configs, err := z.zookeeperToTargets(data)
+	z.config.Log.Info().Msgf("[ZK] Retrieved config: %s", configs)
 
 	if err := target.Validate(configs); err != nil {
 		return nil, fmt.Errorf("configuration in zookeeper is invalid: %v", err)
@@ -291,6 +292,7 @@ func (z *ZookeeperTargetLoader) zookeeperToTargets(t *TargetConfig) (*targetpb.C
 			if origin != "" {
 				path.Origin = origin
 			}
+
 			subs = append(subs, &gnmi.Subscription{
 				Path: path,
 				Mode: request.Mode,
